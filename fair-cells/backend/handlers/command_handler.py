@@ -6,7 +6,7 @@ from typing import Optional
 import docker
 from notebook.base.handlers import APIHandler, HTTPError
 
-from ..container.creator import ContainerCreator
+from ..container.docker_service import DockerService
 from .base_handler import BaseHandler
 
 
@@ -29,14 +29,15 @@ class CommandHandler(BaseHandler):
         client = docker.from_env()
         
         try:
-            container = client.containers.get(image_name)
-            container.stop(timeout=1)
-            status = container.status
+            cc = DockerService()
+            status = cc.stop_image(image=image_name)
+            if not status:
+                status = ['not_found']
         except docker.errors.NotFound:
             status = 'not_found'
         finally:
             self.finish(json.dumps({
-                'data': status
+                'data': status[0]
             }))
 
     def _run(self, image_name):
@@ -47,8 +48,8 @@ class CommandHandler(BaseHandler):
             raise HTTPError(400, 'def')
 
 
-        cc = ContainerCreator('.', image_name, None)
-        container = cc.run_container(port)
+        cc = DockerService()
+        container = cc.run_container(port=port,image=image_name)
 
         self.finish(json.dumps({
             'data': container.status
@@ -58,12 +59,14 @@ class CommandHandler(BaseHandler):
         client = docker.from_env()
 
         try:
-            container = client.containers.get(image_name)
-            status = container.status
+            cc = DockerService()
+            status = cc.get_image_status(image_name)
+            if not status:
+                status=['not_found']
         except docker.errors.NotFound:
             status = 'not_found'
         finally:
             self.finish(json.dumps({
-                'data': status
+                'data': status[0]
             }))
 

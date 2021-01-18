@@ -36,6 +36,36 @@
     .modal-body {
         padding: 0 !important;
     }
+
+    .loader {
+    position: fixed;
+    left: 250px;
+    top: 250px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    green;
+    border-bottom: 16px solid red;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+    }
+
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 
 <ul id="tabs" class="nav nav-tabs">
@@ -45,17 +75,21 @@
     <li id="btn-tab-run">
         <a href="#run" data-toggle="tab">Run</a>
     </li>
-    <li id="btn-tab-validate">
-        <a href="#validate" data-toggle="tab">About</a>
+    <li id="btn-tab-publish">
+        <a href="#publish" data-toggle="tab">Publish</a>
+    </li>
+    <li id="btn-tab-about">
+        <a href="#about" data-toggle="tab">About</a>
     </li>
 </ul>
 
 <form id="fair-cells-form">
+    <div id="loader" class="loader hide"></div>
     <ul id="fair-cells-build" class="flex-outer">
         <h4>Build</h4>
         <li>
             <label for="image-name">Image name:</label>
-            <input id="image-name" value="nb_helper"/>
+            <input id="image-name" value="cloudcells/cell"/>
         </li>
         <li>
             <label for="base-image">Base image:</label>
@@ -106,6 +140,16 @@
 
     <ul id="fair-cells-run" class="flex-outer hide">
         <h4>Run</h4>
+
+         <div id="docker-run" style="width:400px; height:200px; overflow:auto;">
+<!--        <li>-->
+<!--            <table cellspacing="1" cellpadding="1" border="1" width="300" id="image-table2">-->
+<!--            <tr>-->
+<!--                <th>Image</th>-->
+<!--            </tr>-->
+<!--        </table>-->
+        </li>
+
         <li>
             <label for="run-port">Port:</label>
             <input id="run-port" value="10000" type="number"/>
@@ -121,7 +165,49 @@
                 <input id="stop-button" type="submit" value="Stop"/>
             </div>
         </li>
+             </div>
     </ul>
+
+    <ul id="fair-cells-publish" class="flex-outer ">
+        <h4>Publish</h4>
+        <div id="docker-login">
+             <h5>Login</h5>
+            <li>
+
+                <label for="docker-registry">Docker Registry:</label>
+                <input type="url" id="docker-registry" size=30 value="https://index.docker.io/v1/"/>
+            </li>
+            <li>
+                <label for="docker-registry-username">Docker Repository Username:</label>
+                <input id="docker-registry-username" value=""/>
+            </li>
+            <li>
+                <label for="docker-registry-token">Password or authorization token:</label>
+                <input type="password" id="docker-registry-token" name="docker-registry-token"><br><br>
+            </li>
+            <li>
+                <p>
+                    <input id="docker-registry-login-button" type="submit" value="Login"/>
+                </p>
+            </li>
+       </div>
+        <div id="docker-publish" style="width:400px; height:200px; overflow:auto;">
+             <h5>Publish Image</h5>
+<!--            <li>-->
+<!--                <table cellspacing="1" cellpadding="1" border="1" width="300" id="image-table">-->
+<!--                    <tr>-->
+<!--                        <th>Image</th>-->
+<!--                    </tr>-->
+<!--                </table>-->
+<!--            </li>-->
+            <li>
+                <p>
+                    <input id="publish-images-button" type="submit" value="Publish"/>
+                </p>
+            </li>
+       </div>
+    </ul>
+
     <ul id="fair-cells-about" class="flex-outer hide">
         <h4>About</h4>
 

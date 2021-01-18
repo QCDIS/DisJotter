@@ -7,7 +7,7 @@ from typing import Optional
 import docker
 from notebook.base.handlers import APIHandler, HTTPError
 
-from ..container.creator import ContainerCreator
+from ..container.docker_service import DockerService
 from .base_handler import BaseHandler
 
 class InspectHandler(BaseHandler):

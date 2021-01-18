@@ -5,7 +5,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
     const dialog = require('base/js/dialog');
     const { jsonRequest } = require("./util");
 
-    const formPromise = fetch('/dj/templates/form.html').then(resp => resp.text());
+    const formPromise = fetch('/fair-cells/templates/form.html').then(resp => resp.text());
 
     const formElements = {};
     const buttonElements = {};
@@ -38,6 +38,15 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
             cellPreview: document.getElementById('cell-preview'),
             containerStatus: document.getElementById('container-status'),
 
+
+            loginButton: document.getElementById('docker-registry-login-button'),
+            dockerRepositoryInput: document.getElementById('docker-registry'),
+            dockerUsernameInput: document.getElementById('docker-registry-username'),
+            dockerTokenInput: document.getElementById('docker-registry-token'),
+            imageTable: document.getElementById('image-table'),
+//            imageTable2: document.getElementById('image-table2'),
+            loader: document.getElementById('loader'),
+            publishButton: document.getElementById('publish-images-button'),
             kernelSpecific: document.getElementById('kernel-specific')
         }
     }
@@ -51,6 +60,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
 
         currTab = newTab;
     };
+
 
     const setCellSelectOptions = () => {
         // Allow the user to only select code cells.
@@ -76,7 +86,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
                 elms.cellPreview.innerHTML = '<p>Output not rendered.</p>';
             }
 
-            const inspectorResp = await fetch(`/dj/notebook/${notebook.path}/inspect/inspector.html?cellIdx=${idx}`);
+            const inspectorResp = await fetch(`/fair-cells/notebook/${notebook.path}/inspect/inspector.html?cellIdx=${idx}`);
             if (inspectorResp.status === 501) {
                 // No inspector for this Kernel
                 return;
@@ -111,7 +121,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
             }, 5000)
         }, 5000)
 
-        const res = await jsonRequest('POST', `/dj/notebook/${notebook.path}/build_docker_file`, {
+        const res = await jsonRequest('POST', `/fair-cells/notebook/${notebook.path}/build_docker_file`, {
             imageName: elms.imageNameInput.value,
             baseImage: elms.baseImageSelector.value,
             cellIndex: elms.cellSelector.value,
@@ -133,9 +143,59 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
         elms.buildDockerFileOutput.value = data['dockerFile']
     }
 
+    const handleLoginButtonClick = async (e) => {
+        e.preventDefault();
+        elms.loginButton.disabled = true;
+
+        const res = await jsonRequest('POST', `/fair-cells/notebook/${notebook.path}/login`, {
+            dockerRepository: elms.dockerRepositoryInput.value,
+            dockerUsername: elms.dockerUsernameInput.value,
+            dockerToken: elms.dockerTokenInput.value
+        })
+//
+//        clearTimeout(timeoutId);
+//        elms.buildNotify.innerHTML = ""
+        elms.loginButton.disabled = false;
+        if (res.status !== 200) {
+//                return alert(await res.text())
+            return alert(await 'Unauthorized '+elms.dockerRepositoryInput.value+': unauthorized: incorrect username or password')
+        }
+//
+//        const data = await res.json()
+
+
+        return alert(await 'Login Successful')
+    }
+
+
+    const handlePublishClick = async (e) => {
+        e.preventDefault();
+        elms.loader.classList.remove('hide')
+        elms.publishButton.disabled = true;
+        elms.loginButton.disabled = true;
+
+
+        let imageNames = []
+
+        imageNames.push(elms.imageNameInput.value);
+        console.log('imageNames: '+imageNames)
+        const res = await jsonRequest('POST', `/fair-cells/notebook/${notebook.path}/publish`, {
+            images: imageNames
+        })
+
+        elms.loginButton.disabled = false;
+        if (res.status !== 200) {
+            return alert(await res.text())
+        }
+        elms.publishButton.disabled = false;
+        elms.loader.classList.add('hide')
+        return alert(await 'Publish Successful')
+    }
+
+
     const handlebuildContainerButtonClick = async (e) => {
         e.preventDefault();
-
+        elms.loader.classList.remove('hide')
         elms.buildButton.value = 'Building Container...';
         elms.buildButton.disabled = true;
         elms.buildOutput.value = '';
@@ -153,7 +213,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
             }, 5000)
         }, 5000)
 
-        const res = await jsonRequest('POST', `/dj/notebook/${notebook.path}/build`, {
+        const res = await jsonRequest('POST', `/fair-cells/notebook/${notebook.path}/build`, {
             imageName: elms.imageNameInput.value,
             baseImage: elms.baseImageSelector.value,
             cellIndex: elms.cellSelector.value,
@@ -167,22 +227,24 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
         if (res.status !== 200) {
             return alert(await res.text())
         }
-
+        elms.loader.classList.add('hide')
         const data = await res.json()
 
         elms.buildButton.value = 'Build';
         elms.buildButton.disabled = false;
         elms.buildOutput.value = data['logs']
+
     }
 
     const handleRunButtonClick = async (e) => {
         e.preventDefault();
+        let selectedImageName = ''
 
         elms.runButton.value = 'Running...';
         elms.runButton.disabled = true;
 
         const imageName = elms.imageNameInput.value;
-        const res = await jsonRequest('POST', `/dj/image/${imageName}/command/run`, {
+        const res = await jsonRequest('POST', `/fair-cells/image/${imageName}/command/run`, {
             port: Number(elms.runPortInput.value)
         })
 
@@ -202,7 +264,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
         e.preventDefault();
 
         const imageName = elms.imageNameInput.value;
-        const res = await jsonRequest('GET', `/dj/image/${imageName}/command/status`)
+        const res = await jsonRequest('GET', `/fair-cells/image/${imageName}/command/status`)
 
         if (res.status !== 200) {
             return alert(await res.text())
@@ -217,7 +279,7 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
         e.preventDefault();
 
         const imageName = elms.imageNameInput.value;
-        const res = await jsonRequest('POST', `/dj/image/${imageName}/command/stop`)
+        const res = await jsonRequest('POST', `/fair-cells/image/${imageName}/command/stop`)
 
         if (res.status !== 200) {
             return alert(await res.text())
@@ -234,11 +296,13 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
         
         buttonElements['build'] = document.getElementById("btn-tab-build");
         buttonElements['run'] = document.getElementById("btn-tab-run");
-        buttonElements['validate'] = document.getElementById("btn-tab-validate");
+        buttonElements['publish'] = document.getElementById("btn-tab-publish");
+        buttonElements['about'] = document.getElementById("btn-tab-about");
 
         formElements['build'] = document.getElementById("fair-cells-build");
         formElements['run'] = document.getElementById("fair-cells-run");
-        formElements['validate'] = document.getElementById("fair-cells-about");
+        formElements['publish'] = document.getElementById("fair-cells-publish");
+        formElements['about'] = document.getElementById("fair-cells-about");
 
         Object.keys(buttonElements).forEach(k => {
             buttonElements[k].onclick = () => switchTab(k);
@@ -252,12 +316,14 @@ define(["require", "base/js/namespace", "base/js/dialog", "./util"], function (r
 
 
         elms.buildButton.onclick = handlebuildContainerButtonClick;
+        elms.publishButton.onclick = handlePublishClick;
+        elms.loginButton.onclick = handleLoginButtonClick;
         elms.buildDockerfileButton.onclick = handleBuildDockerFileButtonClick;
         elms.runButton.onclick = handleRunButtonClick;
         elms.statusButton.onclick = handleStatusButtonClick;
         elms.stopButton.onclick = handleStopButtonClick;
 
-        const res = await jsonRequest('GET', `/dj/notebook/${notebook.path}/environment`)
+        const res = await jsonRequest('GET', `/fair-cells/notebook/${notebook.path}/environment`)
 
         if (!res.ok) {
             return alert(await res.text());

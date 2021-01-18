@@ -14,7 +14,7 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="FAIR-Cells",
-    version="1.0.13-winter-school-20",
+    version="1.0.14",
     author="Wilco Kruijer, Zhiming Zhao",
     author_email="Z.Zhao@uva.nl",
     description=short_desc,

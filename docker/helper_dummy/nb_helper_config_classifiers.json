@@ -1,0 +1,8 @@
+{"path": "../docker/helper_dummy/classifiers.ipynb", "index": 1,
+  "variables": {"clf": "disabled", "hasattr": "disabled", "mean_predicted_value": "disabled", "n_features": "query",
+    "fraction_of_positives": "disabled", "y_train": "disabled", "plt": "disabled", "y": "disabled",
+    "LogisticRegression": "disabled", "X_train": "disabled", "X": "disabled", "lr": "disabled",
+    "GaussianNB": "disabled", "calibration_curve": "disabled", "ax2": "disabled", "prob_pos": "disabled",
+    "datasets": "disabled", "train_samples": "query", "RandomForestClassifier": "disabled", "n_samples": "query",
+    "name": "disabled", "gnb": "disabled", "ax1": "disabled", "svc": "disabled", "rfc": "disabled", "np": "disabled",
+    "X_test": "disabled", "y_test": "disabled", "LinearSVC": "disabled"}}

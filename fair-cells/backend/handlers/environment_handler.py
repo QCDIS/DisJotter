@@ -11,7 +11,7 @@ from notebook.base.handlers import IPythonHandler, APIHandler, HTTPError
 from notebook.utils import url_path_join
 from pigar.core import parse_packages
 
-from ..container.creator import ContainerCreator
+from ..container.docker_service import DockerService
 from .base_handler import BaseHandler
 
 
