@@ -31,8 +31,8 @@ def load_jupyter_server_extension(nbapp):
 
     web_app = nbapp.web_app
     base = web_app.settings['base_url']
-
-    host_pattern = '.*$'
+    # host_pattern = '.*$'
+    host_pattern = '.*'
     build_pattern = url_path_join(base, '/fair-cells/notebook/(.*)/build')
     build_docker_file_pattern = url_path_join(base, '/fair-cells/notebook/(.*)/build_docker_file')
     images_pattern = url_path_join(base, '/fair-cells/notebook/(.*)/images')
