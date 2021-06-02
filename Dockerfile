@@ -6,7 +6,6 @@ RUN apt update && apt autoclean -y && apt autoremove -y && apt upgrade -y && apt
 
 EXPOSE 8888
 
-
 RUN pip install matplotlib docker #open3d laserchicken
 
 COPY docker/helper_dummy/classifiers.ipynb /home/jovyan/work
