@@ -3,6 +3,7 @@ import os
 import tempfile
 import shutil
 import importlib
+import yaml
 
 from typing import Optional
 
@@ -26,10 +27,9 @@ def create_config(notebook_path, cell_index, variables):
         'variables': variables
     })
 
-
 class BuildDockerFileHandler(BaseHandler):
 
-    def post(self, path):        
+    def post(self, path):
         notebook = self.contents_manager.get(path, content=True)
         notebook_path = os.path.join(os.getcwd(), path)
 
@@ -67,6 +67,19 @@ class BuildDockerFileHandler(BaseHandler):
 
             with open(tmpdir + "/environment.yml", "a") as reqs:
                 reqs.write(requirements)
+
+            with open(tmpdir + "/environment.yml") as file:
+                environment = yaml.load(file, Loader=yaml.FullLoader)
+
+            lines = ''
+            for requ in environment['dependencies'][0]['pip']:
+                lines += requ + '\n'
+
+            with open(tmpdir + '/requirements.txt', 'w') as f:
+                f.write(lines)
+            f.close()
+
+
 
             with open(tmpdir + "/nb_helper_config.json", "a") as cfg:
                 config = create_config(notebook_name, cell_index, variables)

@@ -3,7 +3,7 @@ import os
 import tempfile
 import shutil
 import importlib
-
+import yaml
 from typing import Optional
 
 import docker
@@ -83,6 +83,17 @@ class BuildHandler(BaseHandler):
 
             with open(tmpdir + "/environment.yml", "a") as reqs:
                 reqs.write(requirements)
+
+            with open(tmpdir + "/environment.yml") as file:
+                environment = yaml.load(file, Loader=yaml.FullLoader)
+
+            lines = ''
+            for requ in environment['dependencies'][0]['pip']:
+                lines += requ + '\n'
+
+            with open(tmpdir + '/requirements.txt', 'w') as f:
+                f.write(lines)
+            f.close()
 
             with open(tmpdir + "/nb_helper_config.json", "a") as cfg:
                 config = create_config(notebook_name, cell_index, variables)
